@@ -17,6 +17,7 @@ def _builtin_harness_map() -> dict[str, type[BaseHarness]]:
     from polar.agent.presets.openhands_sdk import OpenHandsSdkHarness
     from polar.agent.presets.opencode import OpenCodeHarness
     from polar.agent.presets.pi import PiHarness
+    from polar.agent.presets.quest import QuestHarness
     from polar.agent.presets.qwen_code import QwenCodeHarness
     from polar.agent.presets.shell import ShellHarness
 
@@ -29,6 +30,7 @@ def _builtin_harness_map() -> dict[str, type[BaseHarness]]:
         "openhands_sdk": OpenHandsSdkHarness,
         "opencode": OpenCodeHarness,
         "pi": PiHarness,
+        "quest": QuestHarness,
         "qwen_code": QwenCodeHarness,
         "shell": ShellHarness,
     }

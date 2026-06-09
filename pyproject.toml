@@ -30,6 +30,11 @@ swebench = [
     "swebench",
     "datasets",
 ]
+quest = [
+    "aiohttp",
+    "huggingface_hub",
+    "requests",
+]
 
 [project.scripts]
 polar = "polar.cli:main"

@@ -77,11 +77,14 @@ def default_evaluator_registry() -> StrategyRegistry:
         SwebenchHarnessEvaluator,
         TestOnOutputEvaluator,
     )
+    from polar.trajectory.evaluator.quest_answer import QuestAnswerEvaluator
+    from polar.trajectory.evaluator.quest_rl_score import QuestRlScoreEvaluator
 
     registry: StrategyRegistry[BaseTrajectoryEvaluator] = StrategyRegistry(BaseTrajectoryEvaluator)
+    registry.register("quest_answer", QuestAnswerEvaluator)
+    registry.register("quest_rl_score", QuestRlScoreEvaluator)
     registry.register("session_completed", SessionCompletedEvaluator)
     registry.register("swebench_harness", SwebenchHarnessEvaluator)
     registry.register("test_on_output", TestOnOutputEvaluator)
     return registry
-
 

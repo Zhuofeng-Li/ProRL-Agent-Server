@@ -1,0 +1,58 @@
+# Polar config for QUEST ReAct agent on GAIA benchmark.
+# Mirrors the structure of examples/swegym_slime_grpo/polar_config.yaml.
+#
+# Prerequisites:
+#   1. Run prepare_data.py to generate quest_gaia_tasks.jsonl
+#   2. Fill in SERPER_KEY_ID and JINA_API_KEYS below (or pass via env)
+#   3. Set polar_agent_cli_dir to a dir containing the QUEST repo at /opt/quest,
+#      OR leave the harness to clone it at runtime (slower but zero setup).
+
+polar_rollout_url: "http://127.0.0.1:8080"
+polar_gateway_url: "http://127.0.0.1:8100"
+polar_reward_key: "score"
+polar_max_async_level: 2
+polar_request_timeout: 1800
+polar_callback_host: "127.0.0.1"
+polar_min_complete_accept_fraction: 0.6
+polar_allow_weight_update_overlap: false
+polar_weight_update_pause_timeout: 300
+
+polar_task_template:
+  timeout_seconds: 1800
+  runtime:
+    backend: "docker"
+    # Use a Python image with network access.
+    # For faster startup, build a custom image with QUEST pre-installed at /opt/quest.
+    image: "python:3.11-slim"
+    network: "host"
+    workdir: "/polar/session/workspace"
+    env:
+      HOME: "/polar/session/home"
+    prepare:
+      - type: exec
+        command: >-
+          mkdir -p /polar/session/logs/agent /polar/session/workspace /polar/session/home &&
+          apt-get update -qq && apt-get install -y -qq git curl 2>/dev/null || true
+
+  agent:
+    harness: "quest"
+    model_name: "your-model-name"   # overwritten by Slime with the training model
+    settings:
+      max_llm_calls: 30
+      max_workers: 1
+    env:
+      # --- Required: fill in your API keys ---
+      SERPER_KEY_ID: ""
+      JINA_API_KEYS: ""
+      # --- Optional: disable tools not needed for GAIA text-only ---
+      # DISABLE_VISIT_TOOL: "1"
+
+  builder:
+    strategy: "prefix_merging"
+
+  evaluator:
+    strategy: "quest_answer"
+    config:
+      ground_truth: "{sample.metadata.ground_truth}"
+
+polar_task_id_template: "polar-quest-gaia-{rollout_id}-{sample.group_index}"

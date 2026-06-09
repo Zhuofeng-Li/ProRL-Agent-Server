@@ -1,0 +1,60 @@
+# Polar bridge configuration for QUEST RL data + QUEST ReAct agent.
+
+polar_rollout_url: "http://127.0.0.1:8080"
+polar_gateway_url: "http://127.0.0.1:8100"
+polar_reward_key: "score"
+polar_max_async_level: 2
+polar_request_timeout: 3600
+polar_callback_host: "127.0.0.1"
+polar_min_complete_accept_fraction: 0.5
+polar_allow_weight_update_overlap: false
+polar_weight_update_pause_timeout: 300
+polar_quest_root: ${QUEST_ROOT}
+polar_quest_eval_scripts_dir: ${QUEST_EVAL_SCRIPTS_DIR}
+
+polar_task_template:
+  timeout_seconds: 3600
+  runtime:
+    backend: "docker"
+    image: "${QUEST_RUNTIME_IMAGE}"
+    network: "host"
+    workdir: "/polar/session/workspace"
+    env:
+      HOME: "/polar/session/home"
+      PYTHONPATH: "/opt/quest/training_scripts/rl:/opt/quest/training_scripts/rl/recipe/deepresearch:/polar/session/workspace"
+    kwargs:
+      volumes:
+        - "${QUEST_ROOT}:/opt/quest:ro"
+    prepare:
+      - type: exec
+        command: >-
+          mkdir -p /polar/session/logs/agent /polar/session/workspace /polar/session/home &&
+          python -m pip install --quiet openai requests pydantic aiohttp 2>&1 | tail -5 || true
+
+  agent:
+    harness: "quest"
+    model_name: "gpt-5.4"
+    settings:
+      max_turns: 30
+    env:
+      SERPER_KEY_ID: "${SERPER_KEY_ID}"
+      JINA_API_KEYS: "${JINA_API_KEYS}"
+
+  builder:
+    strategy: "prefix_merging"
+
+  evaluator:
+    strategy: "quest_rl_score"
+    config:
+      quest_root: "/opt/quest"
+      eval_scripts_dir: "/opt/quest/training_scripts/rl/recipe/deepresearch/eval_scripts"
+      data_source: "{sample.metadata.data_source}"
+      reward_model: "{sample.metadata.reward_model}"
+      extra_info: "{sample.metadata.extra_info}"
+      use_default_scoring: false
+      enable_inline_citation_score: false
+      base_score_weight: 1.0
+      eval_llm_nodes_conf: "/opt/quest/training_scripts/rl/recipe/deepresearch/config/eval_llm_nodes.conf"
+      eval_llm_model: "${EVAL_LLM_MODEL_NAME}"
+
+polar_task_id_template: "polar-quest-rl-{rollout_id}-{sample.group_index}"

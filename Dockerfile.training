@@ -1,0 +1,22 @@
+# Training environment for swegym_slime_grpo example
+# Based on CUDA 12.8.1 with Ubuntu 22.04 (glibc 2.35)
+FROM nvcr.io/nvidia/cuda:12.8.1-cudnn-runtime-ubuntu22.04
+
+# Install Python 3.12 and build deps
+RUN apt-get update && apt-get install -y \
+    python3.12 python3.12-dev python3-pip \
+    git curl wget build-essential \
+    libssl-dev libffi-dev \
+    envsubst \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+RUN pip3 install uv --quiet
+
+# Set working directory to the project root
+WORKDIR /workspace
+
+# The project is mounted as a volume at runtime.
+# Install uv then install packages.
+
+CMD ["/bin/bash"]
